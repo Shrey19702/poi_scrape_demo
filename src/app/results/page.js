@@ -1,7 +1,7 @@
 import clientPromise from "@/lib/mongodb"
 import Show_data from "./show_data"
 
-const page = async ()=>{
+const Page = async ()=>{
 
     const get_mongo_result_data = async ()=>{
         "use server"
@@ -22,4 +22,4 @@ const page = async ()=>{
     )
 }
 
-export default page
+export default Page

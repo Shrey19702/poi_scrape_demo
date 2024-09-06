@@ -58,7 +58,7 @@ const Show_data = ({ data }) => {
 
                                 return (
                                     <>
-                                        <div className="pl-6 pr-6 border-b-2 pb-3" >
+                                        <div key={idx} className="pl-6 pr-6 border-b-2 pb-3" >
                                             <div className="  py-2  flex items-center ">
                                                 <span className=" px-2.5">
                                                     {idx + 1}.
@@ -97,9 +97,9 @@ const Show_data = ({ data }) => {
 
                                                 <div className=" flex flex-col ">
                                                     {
-                                                        val.results.map((clip_val, idx)=>{
+                                                        val.results.map((clip_val, clip_idx)=>{
                                                             return(
-                                                                <div className=" pl-[54px] grid grid-cols-12 gap-3 w-full py-1 bg-slate-100 rounded-full">
+                                                                <div key={clip_idx} className=" pl-[54px] grid grid-cols-12 gap-3 w-full py-1 bg-slate-100 rounded-full">
                                                                     {/* NAME */}
                                                                     <span className='col-span-6 overflow-x-auto mr-4'>
                                                                         {`clip-${idx+1}`}

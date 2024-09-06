@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link";
 import { useState } from "react";
-const page = () => {
+const Page = () => {
 
     const [links_list, setlinks_list] = useState([]);
     const [link, setlink] = useState("");
@@ -105,7 +105,7 @@ const page = () => {
                         {
                             Object.keys(result.source_data).map((key, idx) => {
                                 return (
-                                    <div className=" flex gap-4 ">
+                                    <div className=" flex gap-4 " key={idx}>
                                         <div className=" font-semibold">
                                             {key} :
                                         </div>
@@ -126,4 +126,4 @@ const page = () => {
     )
 }
 
-export default page;
+export default Page;
