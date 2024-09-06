@@ -1,8 +1,16 @@
 "use client"
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import get_mongo_result_data from "@/lib/data";
 
-const Show_data = ({ data }) => {
-    console.log(data);
+const Show_data = () => {
+    // console.log(data);
+    const [data, setdata] = useState([])
+
+    useEffect(()=>{
+        const temp_data = get_mongo_result_data();
+        setdata(temp_data);
+    }, [])
 
     return (
         <div className=''>
@@ -126,7 +134,7 @@ const Show_data = ({ data }) => {
                             <div className=' w-full text-center text-2xl font-light pt-16 '>
                                 No Cases To Show
                             </div>
-                            <Link href={'/fact-checker'} className=' mx-auto mt-10 bg-primary w-fit text-slate-200 hover:text-white  rounded-full px-4 py-2 cursor-pointer hover:shadow transition-all '>
+                            <Link href={'/crawl-sites'} className=' mx-auto mt-10 bg-primary w-fit text-slate-200 hover:text-white  rounded-full px-4 py-2 cursor-pointer hover:shadow transition-all '>
                                 Create a new case
                             </Link>
                         </>
