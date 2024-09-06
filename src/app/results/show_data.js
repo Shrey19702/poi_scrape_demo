@@ -7,11 +7,19 @@ const Show_data = () => {
     // console.log(data);
     const [data, setdata] = useState([])
 
-    useEffect(()=>{
-        const temp_data = get_mongo_result_data();
-        setdata(temp_data);
-    }, [])
-
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const temp_data = await get_mongo_result_data();
+                setdata(temp_data);
+                console.log(temp_data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+        
+        fetchData();
+    }, []);
     return (
         <div className=''>
             <div className=' w-full flex justify-between px-10 items-center '>
