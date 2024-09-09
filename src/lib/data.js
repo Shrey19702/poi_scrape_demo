@@ -1,7 +1,7 @@
 "use server"
 
 import clientPromise from "@/lib/mongodb"
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client } from "@/lib/aws";
 
@@ -66,4 +66,21 @@ const create_s3_save_url = async (s3_key, file_type) => {
     return signedUrl;
 }
 
-export { get_mongo_result_data, save_poi, create_s3_save_url };
+const get_s3_view_url = async (s3_key)=>{
+    // Generate a signed URL for the media file in S3
+    let signedUrl = null;
+    if (s3_key) {
+        try {
+            const command = new GetObjectCommand({
+                Bucket: process.env.S3_BUCKET_NAME,
+                Key: s3_key,
+            });
+            signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 1800 }); // URL valid for 30 mins
+        } catch (s3Error) {
+            console.error('Error generating signed URL:', s3Error);
+        }
+    }
+    return signedUrl;
+}
+
+export { get_mongo_result_data, save_poi, create_s3_save_url, get_s3_view_url };

@@ -1,25 +1,8 @@
 "use client"
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import get_mongo_result_data from "@/lib/data";
 
-const Show_data = () => {
-    // console.log(data);
-    const [data, setdata] = useState([])
+const Show_data = ({data}) => {
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const temp_data = await get_mongo_result_data();
-                setdata(temp_data);
-                console.log(temp_data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-        
-        fetchData();
-    }, []);
     return (
         <div className=''>
             <div className=' w-full flex justify-between px-10 items-center '>
