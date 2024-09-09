@@ -4,8 +4,8 @@ import { MongoClient } from 'mongodb';
 const uri = process.env.MONGODB_URI; // Your MongoDB connection string
 const options = {};
 
-let client;
-let clientPromise;
+var client;
+var clientPromise;
 
 if (process.env.NODE_ENV === 'development') {
   // In development mode, use a global variable so the MongoClient is not constantly created

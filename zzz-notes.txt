@@ -1,0 +1,10 @@
+things to do before deploying
+-> change cors permissions of S3 bucket to allow the website url 
+(currently only localhost:3000 is allowed)
+
+v0 / vercel id
+id
+elhadj.daviel@milkads.org
+
+username:
+vercel.com/elhadjdaviel-milkadsorg
