@@ -4,6 +4,21 @@ import { useRouter } from 'next/navigation';
 
 function ResponsiveTable({ table_data }) {
 
+    // const table_data = [{
+    //     "downloaded_videos": [
+    //         "https:/raw/66e189a0992c10250c10aa64.mp4"
+    //     ],
+    //     "message": "Videos saved successfully",
+    //     "success": true,
+    //     "version": "v0.1",
+    //     "video_count": 1,
+    //     "video_sources": [
+    //         "https://bit-360.site/design/t_quantumai/video/quantumai_en.mp4"
+    //     ],
+    //     "source_url": "https://bit-360.site"
+    // }]
+    let sno = 0;
+
     return (
         <div className="p-4 w-full flex flex-col gap-4 ">
 
@@ -17,46 +32,62 @@ function ResponsiveTable({ table_data }) {
                         <thead className=" bg-primary text-slate-200 sticky top-0">
                             <tr>
                                 <th scope="col" className="px-6 py-3 first:rounded-l-full last:rounded-r-full">
-                                    <span className="bg-primary px-4 font-normal rounded-full inline-block">Sno</span>
+                                    <span className="bg-primary font-normal rounded-full inline-block">Sno</span>
                                 </th>
-                                <th scope="col" className="px-6 py-3 first:rounded-l-full last:rounded-r-full">
-                                    <span className="bg-primary px-4 font-normal rounded-full inline-block">Filename</span>
+                                <th scope="col" className="px-2 py-3 ">
+                                    <span className="bg-primary font-normal rounded-full inline-block">Filename</span>
                                 </th>
-                                <th scope="col" className="px-6 py-3 first:rounded-l-full last:rounded-r-full">
-                                    <span className="bg-primary px-4 font-normal rounded-full inline-block">Video Source</span>
+                                <th scope="col" className="px-2 py-3 ">
+                                    <span className="bg-primary font-normal rounded-full inline-block">Video Source</span>
                                 </th>
-                                <th scope="col" className="px-6 py-3 first:rounded-l-full last:rounded-r-full">
-                                    <span className="bg-primary px-4 font-normal rounded-full inline-block">Source URL</span>
+                                <th scope="col" className="px-2 py-3 first:rounded-l-full last:rounded-r-full">
+                                    <span className="bg-primary font-normal rounded-full inline-block">Source URL</span>
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {table_data.length > 0 ? table_data.map((item, index) => (
-                                <tr
-                                    key={item.sno}
-                                    className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
-                                        } hover:bg-gray-100 transition duration-150 ease-in-out`}
-                                >
-                                    <td className=" py-4 px-4 font-medium text-gray-900 whitespace-nowrap">
-                                        {item.sno}
-                                    </td>
-                                    <td className="py-4 px-4">
-                                        {item.filename}
-                                    </td>
-                                    <td className="py-4 px-4">
-                                        {item.videoSource}
-                                    </td>
-                                    <td className=" py-4 px-4">
-                                        <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                            {item.sourceUrl}
-                                        </a>
-                                    </td>
-                                </tr>
-                            )) : (
+                            {table_data.length > 0 ? table_data.map((item, index) => {
+                                console.log(item)
+                                return (
+                                    <>
+                                        {
+                                            item["video_sources"].map((video, idx) => {
+                                                const path = video.split('/')
+                                                const filename = path[path.length -1]
+                                                sno += 1;
+                                                return (
+                                                    <tr
+                                                        key={`${index}-${idx}`}
+                                                        className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
+                                                            } hover:bg-gray-100 transition duration-150 ease-in-out`}
+                                                    >
+                                                        <td className="px-8 py-3 first:rounded-l-full last:rounded-r-full">
+                                                            {sno}
+                                                        </td>
+                                                        <td className=" px-2 py-3 ">
+                                                            {filename}
+                                                        </td>
+                                                        <td className=" px-2 py-3">
+                                                            {video}
+                                                        </td>
+                                                        <td className=" px-2 py-3 first:rounded-l-full last:rounded-r-full">
+                                                            <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                                                {item.source_url}
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })
+                                        }
+                                    </>
+                                )
+                            }) : (
                                 <tr>
                                     <td colSpan="4" className="text-center py-16 text-lg text-black">No URLs Crawled</td>
                                 </tr>
-                            )}
+                            )
+
+                            }
                         </tbody>
                     </table>
 
@@ -75,10 +106,11 @@ const Page = () => {
     const [results, set_results] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    
     const handle_scrape_start = async () => {
         setLoading(true);
-        for (let i = 0; i < links_list.length; i++) {
 
+        for (let i = 0; i < links_list.length; i++) {
             const options = {
                 method: 'POST',
                 headers: {
@@ -88,14 +120,26 @@ const Page = () => {
                     link: links_list[i]
                 }),
             };
-            const result = await fetch(`https://api.contrails.ai/add-crawler-link`, options);
-            set_results([...results, result]);
+    
+            try {
+                let response = await fetch(`https://api.contrails.ai/crawl-videos`, options);
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+                let result = await response.json();
+                result["source_url"] = links_list[i];
+
+                set_results(prevResults => [...prevResults, result]);
+            } catch (error) {
+                console.error("Fetch error:", error);
+            }
         }
+        setlinks_list([]);
         setLoading(false);
     }
 
     const start_deepfake_analysis = async () => {
-        const result = await fetch(`https://api.contrails.ai/process-pending`, options);
+        const result = await fetch(`https://api.contrails.ai/process-pending`);
         router.push('/crawl-sites');
     }
 
@@ -198,7 +242,7 @@ const Page = () => {
 
                 {/* RESULTS TO CRAWL */}
                 <div className=" w-full min-h-[42vh] shadow-primary shadow rounded-lg py-4 px-6 flex flex-col gap-3 items-end justify-between ">
-                    <ResponsiveTable table_data={table_data} />
+                    <ResponsiveTable table_data={results} />
                     <div onClick={() => { start_deepfake_analysis() }} className=" bg-primary py-2 px-4 cursor-pointer rounded-full text-slate-100 w-fit">
                         Start deepfake analysis
                     </div>
