@@ -4,6 +4,7 @@ import clientPromise from "@/lib/mongodb"
 import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client } from "@/lib/aws";
+import { ObjectId } from "mongodb";
 
 const get_mongo_result_data = async () => {
     const client = await clientPromise;
@@ -21,31 +22,32 @@ const save_poi = async (poi_data) => {
         const client = await clientPromise;
         const db = client.db('poi_demo');
         const collection = db.collection('poi');
-        //update a document
-        if (poi_data.mongo_id !== undefined) {
+
+        // Update a document
+        if (poi_data["mongo_id"]) {
+            const id = new ObjectId(poi_data.mongo_id);  // Use 'new' correctly
             const updateResult = await collection.updateOne(
-                { _id: poi_data.mongo_id },
+                { _id: id },
                 {
                     $set: {
                         "s3_keys": poi_data["s3_keys"]
                     }
                 }
             );
-            console.log("updates: ", updateResult)
+            console.log("updates: ", updateResult);
             return updateResult;
         }
-        //create a document
+        // Create a document
         else {
             const createResult = await collection.insertOne(poi_data);
-            console.log("creation: ", createResult.insertedId.toString())
+            console.log("creation: ", createResult.insertedId.toString());
             return createResult.insertedId.toString();
         }
     }
     catch (error) {
-        console.error("ERROR OCCUERD (mongo)(save to poi): ", error)
+        console.error("ERROR OCCURRED (mongo)(save to poi): ", error);
         return 1;
     }
-
 }
 
 //SAVE IMAGES OF POI TO S3

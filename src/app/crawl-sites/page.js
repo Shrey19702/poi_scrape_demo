@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 function ResponsiveTable({ table_data }) {
 
     // const table_data = [{
-    //     "downloaded_videos": [
-    //         "https:/raw/66e189a0992c10250c10aa64.mp4"
+    //     "media_mongo_id": [
+    //         "66e189a0992c10250c10aa64"
     //     ],
     //     "message": "Videos saved successfully",
     //     "success": true,
@@ -47,41 +47,36 @@ function ResponsiveTable({ table_data }) {
                         </thead>
                         <tbody>
                             {table_data.length > 0 ? table_data.map((item, index) => {
-                                console.log(item)
-                                return (
-                                    <>
-                                        {
-                                            item["video_sources"].map((video, idx) => {
-                                                const path = video.split('/')
-                                                const filename = path[path.length -1]
-                                                sno += 1;
-                                                return (
-                                                    <tr
-                                                        key={`${index}-${idx}`}
-                                                        className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
-                                                            } hover:bg-gray-100 transition duration-150 ease-in-out`}
-                                                    >
-                                                        <td className="px-8 py-3 first:rounded-l-full last:rounded-r-full">
-                                                            {sno}
-                                                        </td>
-                                                        <td className=" px-2 py-3 ">
-                                                            {filename}
-                                                        </td>
-                                                        <td className=" px-2 py-3">
-                                                            {video}
-                                                        </td>
-                                                        <td className=" px-2 py-3 first:rounded-l-full last:rounded-r-full">
-                                                            <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                                                {item.source_url}
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            })
-                                        }
-                                    </>
-                                )
-                            }) : (
+                                return item["video_sources"].map((video, idx) => {
+                                    const path = video.split('/')
+                                    const filename = path[path.length - 1]
+                                    sno += 1;
+                                    return (
+                                        <tr
+                                            key={`${index}-${idx}`}
+                                            className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
+                                                } hover:bg-gray-100 transition duration-150 ease-in-out `}
+                                        >
+                                            <td className="px-8 py-3 first:rounded-l-full last:rounded-r-full">
+                                                {sno}
+                                            </td>
+                                            <td className=" px-2 py-3 max-w-52 overflow-x-auto ">
+                                                {filename}
+                                            </td>
+                                            <td className=" px-2 py-3 max-w-52 overflow-x-auto">
+                                                {video}
+                                            </td>
+                                            <td className=" px-2 py-3 first:rounded-l-full last:rounded-r-full max-w-52 overflow-x-auto">
+                                                <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                                    {item.source_url}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    )
+                                })
+                            }) 
+                            :
+                            (
                                 <tr>
                                     <td colSpan="4" className="text-center py-16 text-lg text-black">No URLs Crawled</td>
                                 </tr>
@@ -97,7 +92,7 @@ function ResponsiveTable({ table_data }) {
     );
 }
 
-const Page = () => {
+const Page = ({ searchParams }) => {
     const router = useRouter();
 
     const [links_list, setlinks_list] = useState([]);
@@ -105,11 +100,14 @@ const Page = () => {
 
     const [results, set_results] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [mongodb_ids, set_mongodb_ids] = useState([]);
 
-    
     const handle_scrape_start = async () => {
         setLoading(true);
-
+        let poi = ''
+        if (searchParams.poi !== undefined) {
+            poi = searchParams.poi
+        }
         for (let i = 0; i < links_list.length; i++) {
             const options = {
                 method: 'POST',
@@ -117,18 +115,30 @@ const Page = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    link: links_list[i]
+                    link: links_list[i],
+                    poi: poi
                 }),
             };
-    
+
             try {
                 let response = await fetch(`https://api.contrails.ai/crawl-videos`, options);
                 if (!response.ok) {
                     throw new Error(`Error: ${response.statusText}`);
                 }
                 let result = await response.json();
+                // let result = {
+                //     'video_sources': ['https://video-link/src/98345bdhs.mp4'],
+                //     'video_count': 1,
+                //     'media_mongo_id': ["sjhf48953___id"],
+                //     'message': 'Videos saved successfully',
+                //     'success': true,
+                //     'version': "v0.1"
+                // }
                 result["source_url"] = links_list[i];
 
+                console.log(result)
+
+                set_mongodb_ids(prevResults => [...prevResults, ...result["media_mongo_id"]])
                 set_results(prevResults => [...prevResults, result]);
             } catch (error) {
                 console.error("Fetch error:", error);
@@ -139,8 +149,17 @@ const Page = () => {
     }
 
     const start_deepfake_analysis = async () => {
-        const result = await fetch(`https://api.contrails.ai/process-pending`);
-        router.push('/crawl-sites');
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                media_ids: mongodb_ids
+            }),
+        };
+        const result = await fetch(`https://api.contrails.ai/process-pending`, options);
+        router.push('/results');
     }
 
     const add_url = () => {

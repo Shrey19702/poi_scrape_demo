@@ -78,10 +78,19 @@ export default function Data_table({ data }) {
                                 </span>
                             </div>
                             <div className="md:col-span-1">
-                                <span className={`px-4 py-1 rounded-full text-xs ${item.prediction === 'real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                    }`}>
-                                    {item.prediction}
-                                </span>
+                                {
+                                    item.prediction === undefined ?
+                                        (
+                                            <span className={`px-4 py-1 rounded-full text-xs`}>
+                                                ---
+                                            </span>)
+                                        :
+                                        (
+                                            <span className={`px-4 py-1 rounded-full text-xs ${item.prediction === 'real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                {item.prediction}
+                                            </span>
+                                        )
+                                }
                             </div>
                             <Link href={item.source_url} className="md:col-span-3 hover:underline truncate text-xs md:text-sm">{item.source_url}</Link>
                             <div className="md:col-span-3 text-xs md:text-sm">{formatDate(item.created_at)}</div>
@@ -91,7 +100,7 @@ export default function Data_table({ data }) {
                                     className="bg-slate-200 hover:bg-slate-300 rounded-full p-2 focus:outline-none"
                                     aria-label={openIndex === index ? "Close details" : "Open details"}
                                 >
-                                    <div className={` ${openIndex === index ? "" : " rotate-180 "} transition-all `} >
+                                    <div className={` ${openIndex === index ? "rotate-180" : "  "} transition-all `} >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="size-5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                         </svg>
@@ -103,28 +112,40 @@ export default function Data_table({ data }) {
                     {/* DROP DOWN */}
                     {openIndex === index && (
                         <div className="mt-4 p-4  rounded-3xl shadow-inner shadow-primary flex w-full justify-between">
-                            {/* for Clips data */}
-                            <div className='min-w-96 border px-2 rounded-3xl '>
-                                <h3 className="text-lg font-semibold mb-4 pt-4 pb-2 px-4">Clip Details</h3>
-                                <div className=" divide-y-2  ">
-                                    {item.results.map((clip, clipIndex) => (
-                                        <div key={clipIndex} className="bg-white py-4 px-8 hover:bg-slate-50">
-                                            <div className="flex justify-between items-center">
-                                                <div className="">clip-{clipIndex}</div>
-                                                <div>
-                                                    <span className={`px-2 py-1 rounded-full text-xs ${clip.final_clip_result === 'real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                                        }`}>
-                                                        {clip.final_clip_result}
-                                                    </span>
-                                                </div>
+                            {
+                                item.results===undefined ?
+                                (
+                                    <>
+                                    </>
+                                )
+                                :
+                                (
+                                    <>
+                                        {/* for Clips data */}
+                                        <div className='min-w-96 border px-2 rounded-3xl '>
+                                            <h3 className="text-lg font-semibold mb-4 pt-4 pb-2 px-4">Clip Details</h3>
+                                            <div className=" divide-y-2  ">
+                                                {item.results.map((clip, clipIndex) => (
+                                                    <div key={clipIndex} className="bg-white py-4 px-8 hover:bg-slate-50">
+                                                        <div className="flex justify-between items-center">
+                                                            <div className="">clip-{clipIndex}</div>
+                                                            <div>
+                                                                <span className={`px-2 py-1 rounded-full text-xs ${clip.final_clip_result === 'real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                                    }`}>
+                                                                    {clip.final_clip_result}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
+                                    </>
+                                )
+                            }
                             {/* for video  */}
                             <div className=' w-full  flex justify-center overflow-hidden rounded-3xl'>
-                                <video 
+                                <video
                                     src={item["view_url"]}
                                     controls
                                     className='max-h-72 rounded-lg'

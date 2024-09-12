@@ -11,6 +11,7 @@ export default function POI_FORM() {
     const [name, setName] = useState('')
     const [files, setFiles] = useState([])
     const [isDragActive, setIsDragActive] = useState(false)
+    let poi_mongo_id = null;
     //   const [state, formAction] = useActionState(saveData)
     const fileInputRef = useRef(null)
 
@@ -77,8 +78,8 @@ export default function POI_FORM() {
 
             // create poi_data
             let poi_data = {
-                name: name,
-                s3_keys: []
+                "name": name,
+                "s3_keys": []
             }
             // create a mongodb_doc
             const res = await save_poi(poi_data);
@@ -102,9 +103,11 @@ export default function POI_FORM() {
                     throw "error in saving a file";
                 }
             }
+            console.log("before update POI data: ", poi_data )
             const update_res = await save_poi(poi_data);
             alert("files saved sucessfully !");
-            router.push('/crawl-sites'); 
+            //Redirect to crawl-sites with the POI-id
+            router.push(`/crawl-sites?poi=${mongo_id}`);
         }
         catch (error) {
             console.error("Error in saving files: ", error);
@@ -139,7 +142,7 @@ export default function POI_FORM() {
                 <div>
                     <label htmlFor="images">Images</label>
                     <div
-                        className={`p-6 mt-2 border-2 border-dashed rounded-md ${isDragActive ? 'border-primary' : 'border-gray-300'
+                        className={`p-6 mt-2 group border-2 border-dashed rounded-md cursor-pointer ${isDragActive ? 'border-primary' : 'border-gray-300'
                             }`}
                         onDragEnter={handleDragEnter}
                         onDragLeave={handleDragLeave}
@@ -158,9 +161,16 @@ export default function POI_FORM() {
                             className="hidden"
                             required
                         />
-                        <p className="text-center">
-                            {isDragActive ? "Drop the files here ..." : "Drag 'n' drop the POI's images here, or click to select files"}
-                        </p>
+                        <div className=' flex flex-col items-center gap-2'>
+                            <span className=' group-hover:-translate-y-1 transition-all'>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                                </svg>
+                            </span>
+                            <p className="text-center ">
+                                {isDragActive ? "Drop the files here ..." : "Drag 'n' drop the POI's images here, or click to select files"}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
