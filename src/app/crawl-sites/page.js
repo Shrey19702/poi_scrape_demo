@@ -1,4 +1,5 @@
 "use client"
+export const dynamic = 'force-dynamic'
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 
@@ -119,7 +120,7 @@ const Page = ({ searchParams }) => {
                     poi: poi
                 }),
             };
-
+            console.log(options)
             try {
                 let response = await fetch(`https://api.contrails.ai/crawl-videos`, options);
                 if (!response.ok) {
