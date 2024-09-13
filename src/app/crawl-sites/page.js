@@ -243,7 +243,7 @@ const Page = ({ searchParams }) => {
 
                     <div className="flex items-center gap-4">
                         <div onClick={() => { handle_scrape_start() }} className=" bg-primary py-2 px-8 cursor-pointer rounded-full text-slate-100 w-fit">
-                            Start Scrapping
+                            Start Crawl
                         </div>
                         {loading &&
                             (
