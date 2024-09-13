@@ -1,5 +1,4 @@
 "use client"
-export const dynamic = 'force-dynamic'
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 
@@ -93,7 +92,7 @@ function ResponsiveTable({ table_data }) {
     );
 }
 
-const Page = ({ searchParams }) => {
+const Page = () => {
     const router = useRouter();
 
     const [links_list, setlinks_list] = useState([]);
@@ -106,8 +105,8 @@ const Page = ({ searchParams }) => {
     const handle_scrape_start = async () => {
         setLoading(true);
         let poi = ''
-        if (searchParams.poi !== undefined) {
-            poi = searchParams.poi
+        if (window !== undefined) {
+            poi = window.location.search.slice(5);
         }
         for (let i = 0; i < links_list.length; i++) {
             const options = {
