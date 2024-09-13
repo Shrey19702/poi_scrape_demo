@@ -86,7 +86,7 @@ export default function Data_table({ data }) {
                                             </span>)
                                         :
                                         (
-                                            <span className={`px-4 py-1 rounded-full text-xs ${item.prediction === 'real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                            <span className={`px-4 py-1 rounded-full text-xs ${(item.prediction === 'real' || item.prediction === 'no poi') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                                 {item.prediction}
                                             </span>
                                         )
@@ -113,35 +113,45 @@ export default function Data_table({ data }) {
                     {openIndex === index && (
                         <div className="mt-4 p-4  rounded-3xl shadow-inner shadow-primary flex w-full justify-between">
                             {
-                                item.results===undefined ?
-                                (
-                                    <>
-                                    </>
-                                )
-                                :
-                                (
-                                    <>
-                                        {/* for Clips data */}
-                                        <div className='min-w-96 border px-2 rounded-3xl '>
-                                            <h3 className="text-lg font-semibold mb-4 pt-4 pb-2 px-4">Clip Details</h3>
-                                            <div className=" divide-y-2  ">
-                                                {item.results.map((clip, clipIndex) => (
-                                                    <div key={clipIndex} className="bg-white py-4 px-8 hover:bg-slate-50">
-                                                        <div className="flex justify-between items-center">
-                                                            <div className="">clip-{clipIndex}</div>
-                                                            <div>
-                                                                <span className={`px-2 py-1 rounded-full text-xs ${clip.final_clip_result === 'real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                                                    }`}>
-                                                                    {clip.final_clip_result}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                (item.results === undefined) ?
+                                    (
+                                        <>
+                                        </>
+                                    )
+                                    :
+                                    (
+                                        <>
+                                            {/* for Clips data */}
+                                            <div className='min-w-96 border px-2 rounded-3xl '>
+                                                <h3 className="text-lg font-semibold mb-4 pt-4 pb-2 px-4">Clip Details</h3>
+                                                <div className=" divide-y-2  ">
+                                                    {
+                                                        item.results.length === 0 ?
+                                                            (
+                                                                <>
+                                                                0 clips of poi extracted
+                                                                </>
+                                                            )
+                                                            :
+                                                            (
+                                                                item.results.map((clip, clipIndex) => (
+                                                                    <div key={clipIndex} className="bg-white py-4 px-8 hover:bg-slate-50">
+                                                                        <div className="flex justify-between items-center">
+                                                                            <div className="">clip-{clipIndex}</div>
+                                                                            <div>
+                                                                                <span className={`px-2 py-1 rounded-full text-xs ${clip.final_clip_result === 'real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                                                    }`}>
+                                                                                    {clip.final_clip_result}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )))
+                                                    }
+                                                </div>
                                             </div>
-                                        </div>
-                                    </>
-                                )
+                                        </>
+                                    )
                             }
                             {/* for video  */}
                             <div className=' w-full  flex justify-center overflow-hidden rounded-3xl'>
