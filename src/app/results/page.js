@@ -6,6 +6,10 @@ import {get_mongo_result_data, get_s3_view_url} from "@/lib/data";
 const Page = async ()=>{
     const data = await get_mongo_result_data();
 
+    console.log(data);
+
+    data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
     for(let i=0; i<data.length; i++){
         const signed_url = await get_s3_view_url(data[i]["s3_key"])
         data[i]["view_url"] = signed_url;

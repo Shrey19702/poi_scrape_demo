@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation';
 
 function ResponsiveTable({ table_data }) {
 
-    // const table_data = [{
+    // const table_data = [
+    //{
     //     "media_mongo_id": [
     //         "66e189a0992c10250c10aa64"
     //     ],
@@ -16,7 +17,8 @@ function ResponsiveTable({ table_data }) {
     //         "https://bit-360.site/design/t_quantumai/video/quantumai_en.mp4"
     //     ],
     //     "source_url": "https://bit-360.site"
-    // }]
+    // }
+    //]
     let sno = 0;
 
     return (
@@ -46,41 +48,74 @@ function ResponsiveTable({ table_data }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {table_data.length > 0 ? table_data.map((item, index) => {
-                                return item["video_sources"].map((video, idx) => {
-                                    const path = video.split('/')
-                                    const filename = path[path.length - 1]
-                                    sno += 1;
-                                    return (
-                                        <tr
-                                            key={`${index}-${idx}`}
-                                            className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
-                                                } hover:bg-gray-100 transition duration-150 ease-in-out `}
-                                        >
-                                            <td className="px-8 py-3 first:rounded-l-full last:rounded-r-full">
-                                                {sno}
-                                            </td>
-                                            <td className=" px-2 py-3 max-w-52 overflow-x-auto ">
-                                                {filename}
-                                            </td>
-                                            <td className=" px-2 py-3 max-w-52 overflow-x-auto">
-                                                {video}
-                                            </td>
-                                            <td className=" px-2 py-3 first:rounded-l-full last:rounded-r-full max-w-52 overflow-x-auto">
-                                                <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                                    {item.source_url}
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    )
-                                })
-                            }) 
-                            :
-                            (
-                                <tr>
-                                    <td colSpan="4" className="text-center py-16 text-lg text-black">No URLs Crawled</td>
-                                </tr>
-                            )
+                            {table_data.length > 0 ?
+
+                                (table_data.map((item, index) => {
+
+                                    if (item["video_count"] > 0) {
+                                        return (<>
+                                            {item["video_sources"].map((video, idx) => {
+                                                const path = video.split('/')
+                                                const filename = path[path.length - 1]
+                                                sno += 1;
+                                                return (
+                                                    <tr
+                                                        key={`${index}-${idx}`}
+                                                        className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
+                                                            } hover:bg-gray-100 transition duration-150 ease-in-out `}
+                                                    >
+                                                        <td className="px-8 py-3 first:rounded-l-full last:rounded-r-full">
+                                                            {sno}
+                                                        </td>
+                                                        <td className=" px-2 py-3 max-w-52 overflow-x-auto ">
+                                                            {filename}
+                                                        </td>
+                                                        <td className=" px-2 py-3 max-w-52 overflow-x-auto">
+                                                            {video}
+                                                        </td>
+                                                        <td className=" px-2 py-3 first:rounded-l-full last:rounded-r-full max-w-52 overflow-x-auto">
+                                                            <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                                                {item.source_url}
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })}
+                                        </>)
+                                    }
+
+                                    else {
+                                        sno += 1;
+                                        return (
+                                            <tr
+                                                key={`${index}`}
+                                                className={`border-b ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'
+                                                    } hover:bg-gray-100 transition duration-150 ease-in-out `}
+                                            >
+                                                <td className="px-8 py-3 first:rounded-l-full last:rounded-r-full">
+                                                    {sno}
+                                                </td>
+                                                <td className=" px-2 py-3 max-w-52 overflow-x-auto ">
+                                                    -
+                                                </td>
+                                                <td className=" px-2 py-3 max-w-52 overflow-x-auto">
+                                                    no video source found
+                                                </td>
+                                                <td className=" px-2 py-3 first:rounded-l-full last:rounded-r-full max-w-52 overflow-x-auto">
+                                                    <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                                        {item.source_url}
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        )
+                                    }
+                                }))
+                                :
+                                (
+                                    <tr>
+                                        <td colSpan="4" className="text-center py-16 text-lg text-black">No URLs Crawled</td>
+                                    </tr>
+                                )
 
                             }
                         </tbody>
@@ -137,8 +172,8 @@ const Page = () => {
                 result["source_url"] = links_list[i];
 
                 console.log(result)
-
-                set_mongodb_ids(prevResults => [...prevResults, ...result["media_mongo_id"]])
+                if (result["media_mongo_id"] != undefined)
+                    set_mongodb_ids(prevResults => [...prevResults, ...result["media_mongo_id"]])
                 set_results(prevResults => [...prevResults, result]);
             } catch (error) {
                 console.error("Fetch error:", error);
@@ -213,16 +248,21 @@ const Page = () => {
                     </form>
 
                     {/* SHOW URLS */}
-                    <div className=" w-full h-full flex flex-col justify-start px-4 py-4 gap-2 ">
+                    <div className=" w-full max-w-[400px] h-full flex flex-col justify-start px-4 py-4 gap-2 ">
                         {
                             links_list.length !== 0 ?
                                 (links_list.map((val, idx) => {
                                     return (
-                                        <div key={idx} className=" border-slate-200 border px-4 py-2 rounded-full flex justify-between">
-                                            <p>
-                                                {idx + 1}. {val}
+                                        <div key={idx} className=" border-slate-200 border px-4 py-2 rounded-full flex gap-2 items-center justify-between">
+                                            <p className="flex gap-3 items-center px-1 max-w-64 overflow-x-scroll ">
+                                                <span>
+                                                    {idx + 1}.
+                                                </span>
+                                                <div className=" break-words text-sm ">
+                                                    {val}
+                                                </div>
                                             </p>
-                                            <div onClick={() => { remove_url(idx) }} className=" bg-slate-200 hover:bg-red-200 p-1 rounded-full cursor-pointer hover:scale-110 transition-all ">
+                                            <div onClick={() => { remove_url(idx) }} className=" w-fit h-fit bg-slate-200 hover:bg-red-200 p-1 rounded-full cursor-pointer hover:scale-110 transition-all ">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="size-4">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
                                                 </svg>
