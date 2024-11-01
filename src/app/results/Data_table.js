@@ -179,7 +179,7 @@ export default function Data_table({ data }) {
                                                     {
                                                         item.results.length === 0 ?
                                                             <div className='w-full text-xl text-center py-4 '>
-                                                                Video doesn't contain the requested POI
+                                                                Video doesn&apos;t contain the requested POI
                                                             </div>
                                                             :
 
