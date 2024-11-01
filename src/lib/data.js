@@ -13,6 +13,10 @@ const get_mongo_result_data = async () => {
 
     const Data = await collection.find({}).toArray();
 
+    for (let i = 0; i < Data.length; i++) {
+        Data[i]["_id"] = Data[i]["_id"].toString();
+    }
+
     return Data
 }
 
@@ -69,7 +73,7 @@ const create_s3_save_url = async (s3_key, file_type) => {
     return signedUrl;
 }
 
-const get_s3_view_url = async (s3_key)=>{
+const get_s3_view_url = async (s3_key) => {
     // Generate a signed URL for the media file in S3
     let signedUrl = null;
     if (s3_key) {
@@ -86,33 +90,37 @@ const get_s3_view_url = async (s3_key)=>{
     return signedUrl;
 }
 
-const get_all_pois = async ()=>{
+const get_all_pois = async () => {
+    "use server";
+
     const client = await clientPromise;
     const db = client.db('poi_demo');
     const collection = db.collection('poi');
 
     const Data = await collection.find({}).toArray();
 
-    for(let i=0; i<Data.length; i++){
-        const img_url = await get_s3_view_url( Data[i]["s3_keys"][0] ) 
+    for (let i = 0; i < Data.length; i++) {
+        const img_url = await get_s3_view_url(Data[i]["s3_keys"][0])
         Data[i]["img_url"] = img_url;
-        Data[i]["_id"] =   Data[i]["_id"].toString();
+        Data[i]["_id"] = Data[i]["_id"].toString();
     }
     return Data;
 }
 
-const get_poi = async ( id )=>{
+const get_poi = async (id) => {
+    "use server";
+    
     const client = await clientPromise;
     const db = client.db('poi_demo');
     const collection = db.collection('poi');
 
     // const objectId = new ObjectId(id);
-    const objectId = ObjectId.createFromHexString(id) 
+    const objectId = ObjectId.createFromHexString(id)
 
-    const data = await collection.findOne({_id : objectId})
-    if(data){
-        const img_url = await get_s3_view_url( data["s3_keys"][0] )
-        data["img_url"] = img_url; 
+    const data = await collection.findOne({ _id: objectId })
+    if (data) {
+        const img_url = await get_s3_view_url(data["s3_keys"][0])
+        data["img_url"] = img_url;
         return data;
     }
     return null

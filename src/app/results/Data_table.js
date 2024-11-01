@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { get_poi } from '@/lib/data';
 
 // const data = [
 //     {
@@ -54,19 +53,43 @@ export default function Data_table({ data }) {
         return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     };
 
+    // useEffect(() => {
+    //     const get_poi_data = async () => {
+    //         if (openIndex !== null) {
+    //             if (data[openIndex]['poi_id'] !== undefined) {
+    //                 const poi_data = await get_poi(data[openIndex]['poi_id']);
+    //                 // console.log(poi_data);
+    //                 setpoi(poi_data);
+    //             }
+    //             else {
+    //                 setpoi(null);
+    //             }
+    //         }
+    //     }
+    //     get_poi_data();
+    // }, [openIndex]);
+
     useEffect(() => {
         const get_poi_data = async () => {
             if (openIndex !== null) {
-                if (data[openIndex]['poi_id'] !== undefined) {
-                    const poi_data = await get_poi(data[openIndex]['poi_id']);
-                    // console.log(poi_data);
-                    setpoi(poi_data);
-                }
-                else {
+                const poiId = data[openIndex]?.poi_id;
+                if (poiId) {
+                    try {
+                        const response = await fetch(`/api/get_poi?poi_id=${poiId}`);
+                        if (!response.ok) throw new Error("Failed to fetch POI data");
+                        const poiData = await response.json();
+                        setpoi(poiData);
+                    } catch (error) {
+                        console.error("Error fetching POI:", error);
+                    }
+                } else {
                     setpoi(null);
                 }
             }
-        }
+            else{
+                setpoi(null);
+            }
+        };
         get_poi_data();
     }, [openIndex]);
 

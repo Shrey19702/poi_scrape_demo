@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { get_all_pois } from "@/lib/data";
 import POI_FORM from './Add_poi_form';
-
-
 
 export default function Show_prev_POIs({ poi_id, set_poi_id }) {
 
@@ -14,12 +11,17 @@ export default function Show_prev_POIs({ poi_id, set_poi_id }) {
 
     useEffect(() => {
         async function get_pois() {
-            let pois = await get_all_pois();
-            console.log(pois);
-            set_pois(pois);
+            try {
+                const response = await fetch('/api/get_all_pois');
+                if (!response.ok) throw new Error("Failed to fetch POIs");
+                const data = await response.json();
+                set_pois(data);
+            } catch (error) {
+                console.error("ERROR:", error);
+            }
         }
         get_pois();
-    }, [show_poi_form])
+    }, [show_poi_form]);
 
     return (
         <div className=" w-[30vw] relative h-[82vh] flex flex-col">
