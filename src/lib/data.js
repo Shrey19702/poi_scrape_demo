@@ -12,6 +12,7 @@ const get_mongo_result_data = async () => {
     const collection = db.collection('media');
 
     const Data = await collection.find({}).toArray();
+
     return Data
 }
 
@@ -85,4 +86,36 @@ const get_s3_view_url = async (s3_key)=>{
     return signedUrl;
 }
 
-export { get_mongo_result_data, save_poi, create_s3_save_url, get_s3_view_url };
+const get_all_pois = async ()=>{
+    const client = await clientPromise;
+    const db = client.db('poi_demo');
+    const collection = db.collection('poi');
+
+    const Data = await collection.find({}).toArray();
+
+    for(let i=0; i<Data.length; i++){
+        const img_url = await get_s3_view_url( Data[i]["s3_keys"][0] ) 
+        Data[i]["img_url"] = img_url;
+        Data[i]["_id"] =   Data[i]["_id"].toString();
+    }
+    return Data;
+}
+
+const get_poi = async ( id )=>{
+    const client = await clientPromise;
+    const db = client.db('poi_demo');
+    const collection = db.collection('poi');
+
+    // const objectId = new ObjectId(id);
+    const objectId = ObjectId.createFromHexString(id) 
+
+    const data = await collection.findOne({_id : objectId})
+    if(data){
+        const img_url = await get_s3_view_url( data["s3_keys"][0] )
+        data["img_url"] = img_url; 
+        return data;
+    }
+    return null
+}
+
+export { get_mongo_result_data, save_poi, create_s3_save_url, get_s3_view_url, get_all_pois, get_poi };

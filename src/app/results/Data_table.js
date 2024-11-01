@@ -1,42 +1,48 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { get_poi } from '@/lib/data';
 
-// const data= [
-//   {
-//     "_id": { "$oid": "66db06360f5a2f74944465db" },
-//     "source_url": "https://systemaibasis.top/",
-//     "upload_status": "completed",
-//     "s3_key": "systemaibasis_top/raw/66db06360f5a2f74944465db.mp4",
-//     "created_at": { "$date": { "$numberLong": "1725630006154" } },
-//     "contentType": "video/mp4",
-//     "file_name": "kazmunay-preland.mp4",
-//     "processing_status": "done",
-//     "prediction": "fake",
-//     "results": [
-//       {
-//         "raw_video_path": "systemaibasis_top/raw/66db06360f5a2f74944465db.mp4",
-//         "clip_path": "systemaibasis_top/preprocessed/66db06360f5a2f74944465db.mp4/clip_0.mp4",
-//         "final_clip_result": "fake"
-//       },
-//       {
-//         "raw_video_path": "systemaibasis_top/raw/66db06360f5a2f74944465db.mp4",
-//         "clip_path": "systemaibasis_top/preprocessed/66db06360f5a2f74944465db.mp4/clip_1.mp4",
-//         "final_clip_result": "fake"
-//       },
-//       {
-//         "raw_video_path": "systemaibasis_top/raw/66db06360f5a2f74944465db.mp4",
-//         "clip_path": "systemaibasis_top/preprocessed/66db06360f5a2f74944465db.mp4/clip_2.mp4",
-//         "final_clip_result": "fake"
-//       }
-//     ]
-//   },
-//   // Add more data items here if needed
+// const data = [
+//     {
+//         "_id": { "$oid": "66db06360f5a2f74944465db" },
+//         "source_url": "https://systemaibasis.top/",
+//         "upload_status": "completed",
+//         "s3_key": "systemaibasis_top/raw/66db06360f5a2f74944465db.mp4",
+//         "created_at": { "$date": { "$numberLong": "1725630006154" } },
+//         "contentType": "video/mp4",
+//         "file_name": "kazmunay-preland.mp4",
+//         "processing_status": "done",
+//         "prediction": "real",
+//         "results": [
+//             {
+//                 "raw_video_path": "systemaibasis_top/raw/66db06360f5a2f74944465db.mp4",
+//                 "clip_path": "systemaibasis_top/preprocessed/66db06360f5a2f74944465db.mp4/clip_0.mp4",
+//                 "frame": "fake",
+//                 "audio": "fake",
+//             },
+//             {
+//                 "raw_video_path": "systemaibasis_top/raw/66db06360f5a2f74944465db.mp4",
+//                 "clip_path": "systemaibasis_top/preprocessed/66db06360f5a2f74944465db.mp4/clip_1.mp4",
+//                 "frame": "fake",
+//                 "audio": "real",
+//             },
+//             {
+//                 "raw_video_path": "systemaibasis_top/raw/66db06360f5a2f74944465db.mp4",
+//                 "clip_path": "systemaibasis_top/preprocessed/66db06360f5a2f74944465db.mp4/clip_2.mp4",
+//                 "frame": "real",
+//                 "audio": "real",
+//             }
+//         ]
+//     },
+//     // Add more data items here if needed
 // ];
 
 export default function Data_table({ data }) {
     console.log(data)
     const [openIndex, setOpenIndex] = useState(null);
+    const [poi, setpoi] = useState(null);
 
     const toggleDropdown = (index) => {
         setOpenIndex(openIndex === index ? null : index);
@@ -47,6 +53,22 @@ export default function Data_table({ data }) {
         // dd/mm/yy
         return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     };
+
+    useEffect(() => {
+        const get_poi_data = async () => {
+            if (openIndex !== null) {
+                if (data[openIndex]['poi_id'] !== undefined) {
+                    const poi_data = await get_poi(data[openIndex]['poi_id']);
+                    // console.log(poi_data);
+                    setpoi(poi_data);
+                }
+                else {
+                    setpoi(null);
+                }
+            }
+        }
+        get_poi_data();
+    }, [openIndex]);
 
     return (
         <div className="container mx-auto p-4">
@@ -112,54 +134,103 @@ export default function Data_table({ data }) {
                     {/* DROP DOWN */}
                     {openIndex === index && (
                         <div className="mt-4 p-4  rounded-3xl shadow-inner shadow-primary flex w-full justify-between">
+                            {/* POI DETAILS */}
                             {
-                                (item.results === undefined) ?
-                                    (
-                                        <>
-                                        </>
-                                    )
-                                    :
-                                    (
-                                        <>
-                                            {/* for Clips data */}
-                                            <div className='min-w-96 border px-2 rounded-3xl '>
-                                                <h3 className="text-lg font-semibold mb-4 pt-4 pb-2 px-4">Clip Details</h3>
-                                                <div className=" divide-y-2  ">
-                                                    {
-                                                        item.results.length === 0 ?
-                                                            (
-                                                                <>
-                                                                0 clips of poi extracted
-                                                                </>
-                                                            )
-                                                            :
-                                                            (
-                                                                item.results.map((clip, clipIndex) => (
-                                                                    <div key={clipIndex} className="bg-white py-4 px-8 hover:bg-slate-50">
-                                                                        <div className="flex justify-between items-center">
-                                                                            <div className="">clip-{clipIndex}</div>
-                                                                            <div>
-                                                                                <span className={`px-2 py-1 rounded-full text-xs ${clip.final_clip_result === 'real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                                                                    }`}>
-                                                                                    {clip.final_clip_result}
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                )))
-                                                    }
-                                                </div>
+                                poi !== null ?
+                                    <div className=' w-fit min-w-52'>
+                                        <div className='text-lg font-semibold '>
+                                            Person Searched :
+                                        </div>
+                                        <div className='flex items-center gap-5 my-5'>
+                                            <Image className='rounded-full' src={poi.img_url} width={75} height={75} />
+                                            <div className=' text-lg '>
+                                                {poi.name}
                                             </div>
-                                        </>
-                                    )
+                                        </div>
+                                    </div>
+                                    :
+                                    <>
+                                    </>
                             }
+
                             {/* for video  */}
                             <div className=' w-full  flex justify-center overflow-hidden rounded-3xl'>
                                 <video
                                     src={item["view_url"]}
                                     controls
-                                    className='max-h-72 rounded-lg'
+                                    className='max-h-72 rounded-xl'
                                 />
+                            </div>
+
+                            {/* RESULT */}
+                            <div className=' w-full'>
+                                {
+                                    (item.results === undefined) ?
+                                        (
+                                            <div className='w-full text-xl text-center py-4 '>
+                                                This file is queued for analysis
+                                            </div>
+                                        )
+                                        :
+                                        (
+                                            <>
+                                                {/* for Clips data */}
+                                                <div className='min-w-96 border px-2 rounded-3xl '>
+                                                    {
+                                                        item.results.length === 0 ?
+                                                            <div className='w-full text-xl text-center py-4 '>
+                                                                Video doesn't contain the requested POI
+                                                            </div>
+                                                            :
+
+                                                            <div className='flex px-3'>
+                                                                <h3 className="w-full text-lg font-semibold mb-4 pt-4 pb-2 px-4">Clip Detail</h3>
+                                                                {
+                                                                    item.results[0].final_clip_result ?
+                                                                        <>
+                                                                            <h3 className="text-lg font-semibold mb-4 pt-4 pb-2 px-4">Prediction</h3>
+                                                                        </>
+                                                                        :
+                                                                        <>
+                                                                            <h3 className="text-lg font-semibold mb-4 pt-4 pb-2 px-4">Frame</h3>
+                                                                            <h3 className="text-lg font-semibold mb-4 mr-2 pt-4 pb-2 px-4">Audio</h3>
+                                                                        </>
+                                                                }
+                                                            </div>
+                                                    }
+
+                                                    <div className=" divide-y-2 max-h-80 overflow-y-auto  ">
+                                                        {
+                                                            item.results.map((clip, clipIndex) => (
+                                                                <div key={clipIndex} className="bg-white py-4 px-8 hover:bg-slate-50 ">
+                                                                    <div className="flex justify-between items-center">
+                                                                        <div className="">clip-{clipIndex + 1}</div>
+                                                                        <div>
+                                                                            {
+                                                                                clip.final_clip_result !== undefined ?
+                                                                                    <span className={`px-2 py-1 rounded-full text-xs ${clip.final_clip_result === 'real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                                                        {clip.final_clip_result}
+                                                                                    </span>
+                                                                                    :
+                                                                                    <span className=' flex gap-6 '>
+                                                                                        <span className={`px-4 py-1 rounded-full text-sm ${clip.frame === 'real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                                                            {clip.frame}
+                                                                                        </span>
+                                                                                        <span className={`px-4 py-1 rounded-full text-sm ${clip.audio === 'real' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                                                            {clip.audio}
+                                                                                        </span>
+                                                                                    </span>
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )
+                                }
                             </div>
                         </div>
                     )}
