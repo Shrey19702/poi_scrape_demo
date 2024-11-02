@@ -1,7 +1,7 @@
 "use server"
 
 import clientPromise from "@/lib/mongodb"
-import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand  } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client } from "@/lib/aws";
 import { ObjectId } from "mongodb";
@@ -109,7 +109,7 @@ const get_all_pois = async () => {
 
 const get_poi = async (id) => {
     "use server";
-    
+
     const client = await clientPromise;
     const db = client.db('poi_demo');
     const collection = db.collection('poi');
@@ -126,4 +126,30 @@ const get_poi = async (id) => {
     return null
 }
 
-export { get_mongo_result_data, save_poi, create_s3_save_url, get_s3_view_url, get_all_pois, get_poi };
+const delete_media = async (mongo_id, s3_key) => {
+    try{
+        const client = await clientPromise;
+        const db = client.db('poi_demo');
+        const collection = db.collection('media');
+        
+        const objectId = ObjectId.createFromHexString(mongo_id)
+        const deleteResult = await collection.deleteOne({ _id: objectId });
+        
+        const command = new DeleteObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: s3_key,
+        });
+        const response = await s3Client.send(command);
+        
+        console.log("MONGO = ", deleteResult)
+        console.log("S3 = ", response)
+        
+        return true;
+    }
+    catch(err){
+        console.error("Error in deletion: ", err)
+        return false
+    }
+}
+
+export { get_mongo_result_data, save_poi, create_s3_save_url, get_s3_view_url, get_all_pois, get_poi, delete_media };
