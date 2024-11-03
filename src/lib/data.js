@@ -1,5 +1,6 @@
 "use server"
 
+import { revalidatePath } from "next/cache";
 import clientPromise from "@/lib/mongodb"
 import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand  } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -91,7 +92,6 @@ const get_s3_view_url = async (s3_key) => {
 }
 
 const get_all_pois = async () => {
-    "use server";
 
     const client = await clientPromise;
     const db = client.db('poi_demo');
@@ -104,6 +104,7 @@ const get_all_pois = async () => {
         Data[i]["img_url"] = img_url;
         Data[i]["_id"] = Data[i]["_id"].toString();
     }
+    revalidatePath('/');
     return Data;
 }
 
